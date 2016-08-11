@@ -115,7 +115,6 @@ public class App {
             for(File f : uploadDir.listFiles()) {
                 f.delete();
             }
-            uploadDir.delete();
             if(uploadDir.listFiles() != null) {
                 File[] files;
                 files = new File[uploadDir.listFiles().length];
