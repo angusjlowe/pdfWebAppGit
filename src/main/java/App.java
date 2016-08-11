@@ -36,6 +36,7 @@ public class App {
         String layout = "templates/layout.vtl";
 
         get("/", (req, res) -> {
+            cleanPreviousUsage(uploadDir);
             Map<String, Object> model = new HashMap();
             model.put("template", "templates/pdf-form.vtl");
             return new ModelAndView(model, layout);
@@ -86,63 +87,13 @@ public class App {
             String resultFileName = combinePdfs(files, uploadDir);
             model.put("resultUrl", resultFileName);
 
-            try {
-                logInfo(req, tempFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ServletException e) {
-                e.printStackTrace();
-            }
             return new ModelAndView(model, layout);
 
         }, new VelocityTemplateEngine());
 
-        get("/files", (req, res) -> {
-            Map<String, Object> model = new HashMap<>();
-            model.put("template", "templates/files.vtl");
-            if(uploadDir.listFiles() != null) {
-                File[] files;
-                files = new File[uploadDir.listFiles().length];
-                files = uploadDir.listFiles();
-                model.put("files", files);
-            }
-            return new ModelAndView(model, layout);
-        }, new VelocityTemplateEngine());
-
-        post("/delete", (req, res) -> {
-            Map<String, Object> model = new HashMap<>();
-            model.put("template", "templates/files.vtl");
-            for(File f : uploadDir.listFiles()) {
-                f.delete();
-            }
-            if(uploadDir.listFiles() != null) {
-                File[] files;
-                files = new File[uploadDir.listFiles().length];
-                files = uploadDir.listFiles();
-                model.put("files", files);
-            }
-            return new ModelAndView(model, layout);
-        }, new VelocityTemplateEngine());
-
     }
 
-
-
-    // methods used for logging
-    private static void logInfo(Request req, Path tempFile) throws IOException, ServletException {
-        System.out.println("Uploaded file '" + getFileName(req.raw().getPart("file1")) + "' saved as '" + tempFile.toAbsolutePath() + "'");
-    }
-
-    private static String getFileName(Part part) {
-        for (String cd : part.getHeader("content-disposition").split(";")) {
-            if (cd.trim().startsWith("filename")) {
-                return cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-            }
-        }
-        return null;
-    }
-
-    //methods for combining pdf
+    //method for combining pdf
     public static String combinePdfs(File[] files, File uploadDir) {
         //merge
         PDFMergerUtility ut = new PDFMergerUtility();
@@ -170,6 +121,15 @@ public class App {
             e.printStackTrace();
         }
         return tempFile.getFileName().toString();
+    }
+
+    //clean
+    public static void cleanPreviousUsage(File uploadDir) {
+        if (uploadDir != null) {
+            for(File f : uploadDir.listFiles()) {
+                f.delete();
+            }
+        }
     }
 
 
