@@ -1,0 +1,8 @@
+<ul>
+#foreach($file in $files)
+    <li>$file.getName()</li>
+#end
+</ul>
+<form action="/delete" method="post">
+    <button class="btn btn-danger">Delete</button>
+</form>
